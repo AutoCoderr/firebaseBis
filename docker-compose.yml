@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+
+  server:
+    image: node:16
+    ports:
+    - "3001:3001"
+    env_file:
+      - .env
+    volumes:
+    - "./server:/server"
+    working_dir: /server
+    command: "npm start"
+    networks:
+      - bdd
+      - exterior
+
+  mongodb:
+    image: mongo:bionic
+    volumes:
+      - ./mongodb/mongod.conf:/etc/mongod.conf
+      - ./mongodb/data/db/:/data/db/
+      - ./mongodb/data/log/:/var/log/mongodb/
+      - ./mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+    networks:
+      - bdd
+      - exterior
+
+networks:
+  bdd:
+    internal: true
+  exterior:
+    internal: false
